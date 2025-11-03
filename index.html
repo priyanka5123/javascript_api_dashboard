@@ -21,12 +21,22 @@
             </section>
             <section class="grid-item" id="weather-api">
                 <h2>☀️ Weather Info</h2>
+                <input type="text" id="city-input" placeholder="Enter city name" />
                 <button onclick="getWeather()">Get Weather</button>
                 <div class="output" id="weather-output"></div>
             </section>
             <section class="grid-item" id="currency-api">
                 <h2>💱 Currency Rates</h2>
-                <button onclick="getExchangeRates()">Get Rates</button>
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" placeholder="Enter amount" value="1" min="0" step="any">
+
+                <label for="base-currency">From:</label>
+                <select id="base-currency"></select>
+
+                <label for="target-currency">To:</label>
+                <select id="target-currency"></select>
+
+                <button onclick="getCurrencyRate()">Get Rates</button>
                 <div class="output" id="currency-output"></div>
             </section>
             <section class="grid-item" id="movies-api">
