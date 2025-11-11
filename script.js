@@ -88,50 +88,137 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Fetch and calculate currency conversion
- async function getCurrencyRate() {
-      const amount = parseFloat(document.getElementById("amount").value);
-      const base = document.getElementById("base-currency").value.trim().toUpperCase();
-      const target = document.getElementById("target-currency").value.trim().toUpperCase();
-      const output = document.getElementById("currency-output");
+async function getCurrencyRate() {
+  const amount = parseFloat(document.getElementById("amount").value);
+  const base = document.getElementById("base-currency").value.trim().toUpperCase();
+  const target = document.getElementById("target-currency").value.trim().toUpperCase();
+  const output = document.getElementById("currency-output");
 
-      if (!amount || amount <= 0) {
-        output.innerHTML = "⚠️ Please enter a valid amount.";
-        return;
-      }
-      if (!base || !target) {
-        output.innerHTML = "⚠️ Please enter valid currency codes.";
-        return;
-      }
-      if (base === target) {
-        output.innerHTML = "⚠️ Please enter two different currencies.";
-        return;
-      }
+  if (!amount || amount <= 0) {
+    output.innerHTML = "⚠️ Please enter a valid amount.";
+    return;
+  }
+  if (!base || !target) {
+    output.innerHTML = "⚠️ Please enter valid currency codes.";
+    return;
+  }
+  if (base === target) {
+    output.innerHTML = "⚠️ Please enter two different currencies.";
+    return;
+  }
 
-      output.innerHTML = `Converting <b>${amount} ${base}</b> to ${target}... 💹`;
+  output.innerHTML = `Converting <b>${amount} ${base}</b> to ${target}... 💹`;
 
-      try {
-        const response = await fetch(
-          `https://api.frankfurter.app/latest?amount=${amount}&from=${base}&to=${target}`
-        );
-        if (!response.ok) throw new Error("Network error");
-        
-        const data = await response.json();
-        const converted = data.rates[target];
-        if (!converted) {
-          output.innerHTML = `❌ Couldn't convert ${base} → ${target}. Please check codes.`;
-          return;
-        }
-
-        output.innerHTML = `
-          <div style="background:#f5f5f5; padding:10px; border-radius:8px;">
-            <h3>💱 ${base} → ${target}</h3>
-            <p>💰 ${amount} ${base} = <strong>${converted.toFixed(4)} ${target}</strong></p>
-            <p>📅 Date: ${data.date}</p>
-          </div>
-        `;
-      } catch (error) {
-        output.innerHTML = "⚠️ Oops! Couldn't fetch currency rates right now.";
-        console.error("Error fetching currency rates:", error);
-      }
+  try {
+    const response = await fetch(
+      `https://api.frankfurter.app/latest?amount=${amount}&from=${base}&to=${target}`
+    );
+    if (!response.ok) throw new Error("Network error");
+    
+    const data = await response.json();
+    const converted = data.rates[target];
+    if (!converted) {
+      output.innerHTML = `❌ Couldn't convert ${base} → ${target}. Please check codes.`;
+      return;
     }
-  
+
+    output.innerHTML = `
+      <div style="background:#f5f5f5; padding:10px; border-radius:8px;">
+        <h3>💱 ${base} → ${target}</h3>
+        <p>💰 ${amount} ${base} = <strong>${converted.toFixed(4)} ${target}</strong></p>
+        <p>📅 Date: ${data.date}</p>
+      </div>
+    `;
+  } catch (error) {
+    output.innerHTML = "⚠️ Oops! Couldn't fetch currency rates right now.";
+    console.error("Error fetching currency rates:", error);
+  }
+}
+async function getMovies() {
+  const output = document.getElementById("movies-output");
+  output.innerHTML = "🎥 Loading trending movies...";
+
+  // Keywords we’ll use to simulate “trending”
+  const keywords = ["2024", "2025", "new", "latest", "top"];
+  const apiKey = "thewdb"; // OMDb public demo key
+
+  try {
+    // Fetch multiple keyword searches at once
+    const responses = await Promise.all(
+      keywords.map(k =>
+        fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(k)}&type=movie&apikey=${apiKey}`)
+          .then(r => r.json())
+          .catch(() => null)
+      )
+    );
+
+    // Combine all movies into one array, filter out invalid or duplicates
+    let movies = [];
+    responses.forEach(r => {
+      if (r && r.Search) {
+        r.Search.forEach(m => {
+          if (!movies.some(x => x.imdbID === m.imdbID)) {
+            movies.push(m);
+          }
+        });
+      }
+    });
+
+    if (movies.length === 0) {
+      output.innerHTML = "❌ No trending movies found right now.";
+      return;
+    }
+
+    // Sort by year (descending) and limit to top 12
+    movies.sort((a, b) => parseInt(b.Year) - parseInt(a.Year));
+    movies = movies.slice(0, 12);
+
+    // Display results
+    output.innerHTML = movies
+      .map(m => `
+        <div style="display:inline-block; text-align:center; margin:10px;">
+          <img src="${m.Poster !== 'N/A' ? m.Poster : ''}" 
+               alt="${m.Title}" width="150" 
+               style="border-radius:8px; height:220px; object-fit:cover;">
+          <p><strong>${m.Title}</strong><br>📅 ${m.Year}</p>
+        </div>
+      `)
+      .join("");
+
+  } catch (err) {
+    console.error(err);
+    output.innerHTML = "⚠️ Couldn't load movie data.";
+  }
+}
+async function getGithubUser() {
+  const username = document.getElementById("github-username").value.trim();
+  const output = document.getElementById("github-output");
+
+  if (!username) {
+    output.innerHTML = "⚠️ Please enter a username.";
+    return;
+  }
+
+  output.innerHTML = "🔍 Searching GitHub user...";
+
+  try {
+    const response = await fetch(`https://api.github.com/users/${username}`);
+    if (!response.ok) throw new Error("User not found");
+
+    const data = await response.json();
+
+    output.innerHTML = `
+      <div style="background:#f5f5f5; padding:10px; border-radius:8px; text-align:center;">
+        <img src="${data.avatar_url}" alt="${data.login}" width="100" style="border-radius:50%;">
+        <h3>${data.name || data.login}</h3>
+        <p>👥 Followers: ${data.followers} | Following: ${data.following}</p>
+        <p>📦 Public Repos: ${data.public_repos}</p>
+        <p>📍 ${data.location || "Unknown location"}</p>
+        <a href="${data.html_url}" target="_blank">🔗 Visit Profile</a>
+      </div>
+    `;
+  } catch (error) {
+    output.innerHTML = "❌ User not found or error fetching data.";
+    console.error(error);
+  }
+}
