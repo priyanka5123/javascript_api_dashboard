@@ -81,77 +81,57 @@ async function getWeather() {
     console.error("Error fetching weather:", error);
   }
 }
-// Populate currency dropdowns
-async function populateCurrencies() {
-  const baseSelect = document.getElementById("base-currency");
-  const targetSelect = document.getElementById("target-currency");
-
-  try {
-    const response = await fetch("https://api.exchangerate.host/symbols");
-    if (!response.ok) throw new Error("Failed to fetch currency symbols");
-
-    const data = await response.json();
-    const symbols = data.symbols;
-
-    for (const code in symbols) {
-      const optionText = `${code} - ${symbols[code].description}`;
-      const option1 = new Option(optionText, code);
-      const option2 = new Option(optionText, code);
-      baseSelect.add(option1);
-      targetSelect.add(option2);
-    }
-
-    // Defaults
-    baseSelect.value = "USD";
-    targetSelect.value = "EUR";
-
-  } catch (error) {
-    console.error("Error fetching currency symbols:", error);
-  }
-}
-
-// Call on page load
-populateCurrencies();
+// Just set default input values
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("base-currency").value = "USD";
+  document.getElementById("target-currency").value = "EUR";
+});
 
 // Fetch and calculate currency conversion
-async function getCurrencyRate() {
-  const amount = parseFloat(document.getElementById("amount").value);
-  const base = document.getElementById("base-currency").value;
-  const target = document.getElementById("target-currency").value;
-  const output = document.getElementById("currency-output");
+ async function getCurrencyRate() {
+      const amount = parseFloat(document.getElementById("amount").value);
+      const base = document.getElementById("base-currency").value.trim().toUpperCase();
+      const target = document.getElementById("target-currency").value.trim().toUpperCase();
+      const output = document.getElementById("currency-output");
 
-  if (!amount || amount <= 0) {
-    output.innerHTML = "⚠️ Please enter a valid amount.";
-    return;
-  }
+      if (!amount || amount <= 0) {
+        output.innerHTML = "⚠️ Please enter a valid amount.";
+        return;
+      }
+      if (!base || !target) {
+        output.innerHTML = "⚠️ Please enter valid currency codes.";
+        return;
+      }
+      if (base === target) {
+        output.innerHTML = "⚠️ Please enter two different currencies.";
+        return;
+      }
 
-  if (base === target) {
-    output.innerHTML = "⚠️ Please select two different currencies.";
-    return;
-  }
+      output.innerHTML = `Converting <b>${amount} ${base}</b> to ${target}... 💹`;
 
-  output.innerHTML = `Converting <b>${amount} ${base}</b> to ${target}... 💹`;
+      try {
+        const response = await fetch(
+          `https://api.frankfurter.app/latest?amount=${amount}&from=${base}&to=${target}`
+        );
+        if (!response.ok) throw new Error("Network error");
+        
+        const data = await response.json();
+        const converted = data.rates[target];
+        if (!converted) {
+          output.innerHTML = `❌ Couldn't convert ${base} → ${target}. Please check codes.`;
+          return;
+        }
 
-  try {
-    const response = await fetch(`https://api.exchangerate.host/convert?from=${base}&to=${target}&amount=${amount}`);
-    if (!response.ok) throw new Error("Network response was not ok");
-
-    const data = await response.json();
-    if (!data.result) {
-      output.innerHTML = `❌ Couldn't convert ${base} → ${target}.`;
-      return;
+        output.innerHTML = `
+          <div style="background:#f5f5f5; padding:10px; border-radius:8px;">
+            <h3>💱 ${base} → ${target}</h3>
+            <p>💰 ${amount} ${base} = <strong>${converted.toFixed(4)} ${target}</strong></p>
+            <p>📅 Date: ${data.date}</p>
+          </div>
+        `;
+      } catch (error) {
+        output.innerHTML = "⚠️ Oops! Couldn't fetch currency rates right now.";
+        console.error("Error fetching currency rates:", error);
+      }
     }
-
-    output.innerHTML = `
-      <div style="background:#f5f5f5; padding:10px; border-radius:8px;">
-        <h3>💱 ${base} → ${target}</h3>
-        <p>💰 ${amount} ${base} = <strong>${data.result.toFixed(4)} ${target}</strong></p>
-        <p>📅 Date: ${data.date}</p>
-      </div>
-    `;
-
-  } catch (error) {
-    output.innerHTML = "⚠️ Oops! Couldn't fetch currency rates right now.";
-    console.error("Error fetching currency rates:", error);
-  }
-}
+  

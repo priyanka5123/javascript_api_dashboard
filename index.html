@@ -27,18 +27,35 @@
             </section>
             <section class="grid-item" id="currency-api">
                 <h2>💱 Currency Rates</h2>
+
                 <label for="amount">Amount:</label>
-                <input type="number" id="amount" placeholder="Enter amount" value="1" min="0" step="any">
+                <input
+                    type="number"
+                    id="amount"
+                    placeholder="Enter amount"
+                    value="1"
+                    min="0"
+                    step="any"
+                />
 
                 <label for="base-currency">From:</label>
-                <select id="base-currency"></select>
+                <input
+                    type="text"
+                    id="base-currency"
+                    placeholder="Enter base currency (e.g. USD)"
+                />
 
                 <label for="target-currency">To:</label>
-                <select id="target-currency"></select>
+                <input
+                    type="text"
+                    id="target-currency"
+                    placeholder="Enter target currency (e.g. EUR)"
+                />
 
                 <button onclick="getCurrencyRate()">Get Rates</button>
                 <div class="output" id="currency-output"></div>
             </section>
+
             <section class="grid-item" id="movies-api">
                 <h2>🎮 Trending Movies</h2>
                 <button onclick="getMovies()">Get Movies</button>
