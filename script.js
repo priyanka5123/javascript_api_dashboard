@@ -30,6 +30,9 @@ async function getCatImage(){
         console.error("Error fetching cat image:", error);
     }
 }
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("city-input").value = "California";
+});
 
 async function getWeather() {
   const city = document.getElementById("city-input").value.trim();
@@ -136,60 +139,33 @@ async function getCurrencyRate() {
 }
 async function getMovies() {
   const output = document.getElementById("movies-output");
-  output.innerHTML = "🎥 Loading trending movies...";
-
-  // Keywords we’ll use to simulate “trending”
-  const keywords = ["2024", "2025", "new", "latest", "top"];
-  const apiKey = "thewdb"; // OMDb public demo key
+  output.innerHTML = "🎥 Fetching trending movies...";
 
   try {
-    // Fetch multiple keyword searches at once
-    const responses = await Promise.all(
-      keywords.map(k =>
-        fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(k)}&type=movie&apikey=${apiKey}`)
-          .then(r => r.json())
-          .catch(() => null)
-      )
-    );
+    const res = await fetch("http://localhost:3000/trending");
+    const data = await res.json();
 
-    // Combine all movies into one array, filter out invalid or duplicates
-    let movies = [];
-    responses.forEach(r => {
-      if (r && r.Search) {
-        r.Search.forEach(m => {
-          if (!movies.some(x => x.imdbID === m.imdbID)) {
-            movies.push(m);
-          }
-        });
-      }
-    });
+    if (!data.results) throw new Error("No results");
 
-    if (movies.length === 0) {
-      output.innerHTML = "❌ No trending movies found right now.";
-      return;
-    }
-
-    // Sort by year (descending) and limit to top 12
-    movies.sort((a, b) => parseInt(b.Year) - parseInt(a.Year));
-    movies = movies.slice(0, 12);
-
-    // Display results
+    const movies = data.results.slice(0, 3);
     output.innerHTML = movies
-      .map(m => `
+      .map(movie => `
         <div style="display:inline-block; text-align:center; margin:10px;">
-          <img src="${m.Poster !== 'N/A' ? m.Poster : ''}" 
-               alt="${m.Title}" width="150" 
-               style="border-radius:8px; height:220px; object-fit:cover;">
-          <p><strong>${m.Title}</strong><br>📅 ${m.Year}</p>
+          <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" 
+               alt="${movie.title}" 
+               style="border-radius:8px; width:150px;">
+          <p><strong>${movie.title}</strong><br>⭐ ${movie.vote_average.toFixed(1)}</p>
         </div>
       `)
       .join("");
-
-  } catch (err) {
-    console.error(err);
-    output.innerHTML = "⚠️ Couldn't load movie data.";
+  } catch (error) {
+    console.error("Error fetching movies:", error);
+    output.innerHTML = "⚠️ Oops! Couldn’t fetch movie data.";
   }
 }
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("github-username").value = "torvalds";
+});
 async function getGithubUser() {
   const username = document.getElementById("github-username").value.trim();
   const output = document.getElementById("github-output");
@@ -220,5 +196,47 @@ async function getGithubUser() {
   } catch (error) {
     output.innerHTML = "❌ User not found or error fetching data.";
     console.error(error);
+  }
+}
+async function getJoke() {
+  const output = document.getElementById("joke-output");
+  output.innerHTML = "😂 Fetching a joke...";
+
+  try {
+    const response = await fetch("https://official-joke-api.appspot.com/random_joke");
+    if (!response.ok) throw new Error("Failed to fetch joke");
+
+    const joke = await response.json();
+
+    output.innerHTML = `
+      <div style="background:#f5f5f5; padding:10px; border-radius:8px; text-align:center;">
+        <p>🤣 <strong>${joke.setup}</strong></p>
+        <p>💬 ${joke.punchline}</p>
+      </div>
+    `;
+  } catch (error) {
+    console.error(error);
+    output.innerHTML = "⚠️ Could not fetch a joke right now.";
+  }
+}
+
+async function getPoem() {
+  const output = document.getElementById("poem-output");
+  output.innerHTML = "📜 Loading poem...";
+
+  try {
+    const response = await fetch("https://poetrydb.org/random/1"); // 1 random poem
+    if (!response.ok) throw new Error("Network error");
+
+    const data = await response.json();
+    const poem = data[0];
+
+    output.innerHTML = `
+      <h3>${poem.title} — <em>${poem.author}</em></h3>
+      <p>${poem.lines.join('<br>')}</p>
+    `;
+  } catch (err) {
+    console.error("Error fetching poem:", err);
+    output.innerHTML = "⚠️ Couldn't fetch a poem right now.";
   }
 }
