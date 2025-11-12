@@ -82,12 +82,6 @@ Navigate to [http://127.0.0.1:3000](http://127.0.0.1:3000) in your browser.
 ![Demo](Images/Javascript_Api_Dashboard.gif)
 
 
----
 
-## Notes
-
-* Make sure to use **`localhost` consistently** in both frontend fetch calls and server URL to avoid **CORS issues**.
-* For TMDb API, you need a valid API key.
-* Some APIs may have rate limits.
 
 
