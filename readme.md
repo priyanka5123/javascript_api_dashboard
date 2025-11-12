@@ -1,6 +1,3 @@
-Absolutely! Here's a polished **README** for your API Dashboard project that you can copy to GitHub. I’ve written it so it’s clear, professional, and easy to follow:
-
----
 
 # JavaScript API Dashboard 🌐
 
@@ -19,15 +16,15 @@ A dynamic dashboard built with **HTML, CSS, and JavaScript** that interacts with
 
 ## Demo
 
-![API Dashboard Screenshot](screenshot.png) *(Optional: add a screenshot of your app)*
+![Demo](Images/Javascript_Api_Dashboard.gif)
 
 ## Installation
 
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/api-dashboard.git
-cd api-dashboard
+git clone https://github.com/priyanka5123/javascript_api_dashboard.git
+cd javascript_api_dashboard
 ```
 
 2. **Install dependencies**
@@ -75,11 +72,6 @@ Navigate to [http://127.0.0.1:3000](http://127.0.0.1:3000) in your browser.
 * **Backend:** Node.js, Express
 * **APIs:** Dog CEO, The Cat API, Open-Meteo, Frankfurter, TMDB, GitHub, Official Joke API, PoetryDB
 
----
-
-## Demo
-
-![Demo](Images/Javascript_Api_Dashboard.gif)
 
 
 
